@@ -31,6 +31,7 @@ class Configuration extends Record {
     protected $_host = 'api.airbrake.io';
     protected $_resource = '/notifier_api/v2/notices';
     protected $_apiEndPoint;
+    protected $_notificationHandler;
 
     /**
      * Load the given data array to the record.

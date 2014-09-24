@@ -91,8 +91,8 @@ class Client {
      * @return string
      */
     public function notify(Notice $notice) {
-        if (!empty($this->configuration->notifyHandler) && $this->configuration->notifyHandler instanceof NotificationHandler) {
-            return $this->configuration->notifyHandler->sendNotification($notice);
+        if (!empty($this->configuration->notificationHandler) && $this->configuration->notificationHandlerv instanceof NotificationHandler) {
+            return $this->configuration->notificationHandler->sendNotification($notice);
         } else {
             return $this->connection->send($notice);
         }
