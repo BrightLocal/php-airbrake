@@ -9,46 +9,42 @@ namespace Airbrake;
  * @copyright  (c) 2011-2013 Drew Butler
  * @license    http://www.opensource.org/licenses/mit-license.php
  */
-class Connection
-{
-    protected $configuration = null;
-    protected $headers = array();
+class Connection {
+
+    /** @var Configuration */
+    protected $configuration;
+    protected $headers = [];
 
     /**
      * Build the object with the airbrake Configuration.
      *
-     * @param Airbrake\Configuration $configuration
+     * @param Configuration $configuration
      */
-    public function __construct(Configuration $configuration)
-    {
+    public function __construct(Configuration $configuration) {
         $this->configuration = $configuration;
-
-        $this->addHeader(array(
+        $this->addHeader([
             'Accept: text/xml, application/xml',
-            'Content-Type: text/xml'
-        ));
+            'Content-Type: text/xml',
+        ]);
     }
 
     /**
      * Add a header to the connection.
      *
-     * @param string header
+     * @param string $header
      */
-    public function addHeader($header)
-    {
-        $this->headers += (array)$header;
+    public function addHeader($header) {
+        $this->headers += (array) $header;
     }
 
     /**
-     * @param Airbrake\Notice $notice
+     * @param Notice $notice
+     *
      * @return string
      **/
-    public function send(Notice $notice)
-    {
+    public function send(Notice $notice) {
         $curl = curl_init();
-
         $xml = $notice->toXml($this->configuration);
-
         curl_setopt($curl, CURLOPT_URL, $this->configuration->apiEndPoint);
         curl_setopt($curl, CURLOPT_POST, 1);
         curl_setopt($curl, CURLOPT_HEADER, 0);
@@ -58,10 +54,6 @@ class Connection
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
-
-        $return = curl_exec($curl);
-        curl_close($curl);
-
-        return $return;
+        return curl_exec($curl);
     }
 }
