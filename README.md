@@ -78,7 +78,13 @@ To use custom handler, create a class that implements Airbrake\Interfaces\Notifi
 <?php
 require_once 'vendor/autoload.php';
 
-Airbrake\EventHandler::start('[your api key]', true, ['notificationHandler' => new MyNotificationHandler()]);
+Airbrake\EventHandler::start(
+    '[your api key]',
+    true,
+    [
+        'notificationHandler' => new MyNotificationHandler(),
+    ]
+);
 ```
 
 Configuration Options
