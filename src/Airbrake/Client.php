@@ -51,17 +51,17 @@ class Client {
      */
     public function notifyOnError($message, array $backtrace = null) {
         if (!$backtrace) {
-            $backtrace = debug_backtrace();
+            $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
             if (count($backtrace) > 1) {
                 array_shift($backtrace);
             }
         }
         $notice = new Notice;
-        $notice->load(array(
+        $notice->setConfiguration($this->configuration)->load([
             'errorClass'   => 'PHP Error',
             'backtrace'    => $backtrace,
             'errorMessage' => $message,
-        ));
+        ]);
         return $this->notify($notice);
     }
 
@@ -74,11 +74,13 @@ class Client {
      */
     public function notifyOnException(Exception $exception) {
         $notice = new Notice;
-        $notice->load(array(
-            'errorClass'   => get_class($exception),
-            'backtrace'    => $this->cleanBacktrace($exception->getTrace() ?: debug_backtrace()),
-            'errorMessage' => $exception->getMessage() . ' in ' . $exception->getFile() . ' on line ' . $exception->getLine(),
-        ));
+        $notice
+            ->setConfiguration($this->configuration)
+            ->load([
+                'errorClass'   => get_class($exception),
+                'backtrace'    => debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS),
+                'errorMessage' => $exception->getMessage() . ' in ' . $exception->getFile() . ' on line ' . $exception->getLine(),
+            ]);
         return $this->notify($notice);
     }
 
@@ -98,17 +100,4 @@ class Client {
         }
     }
 
-    /**
-     * Clean the backtrace of unneeded junk.
-     *
-     * @param array $backtrace
-     *
-     * @return array
-     */
-    protected function cleanBacktrace($backtrace) {
-        foreach ($backtrace as &$item) {
-            unset($item['args']);
-        }
-        return $backtrace;
-    }
 }

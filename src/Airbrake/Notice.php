@@ -11,8 +11,8 @@ use SimpleXMLElement;
  * @copyright  (c) 2011-2013 Drew Butler
  * @license    http://www.opensource.org/licenses/mit-license.php
  */
-class Notice extends Record
-{
+class Notice extends Record {
+
     /**
      * The backtrace from the given exception or hash.
      */
@@ -33,35 +33,41 @@ class Notice extends Record
      */
     protected $_extraParameters = array();
 
+    protected $configuration;
+
+    public function setConfiguration(Configuration $configuration) {
+        $this->configuration = $configuration;
+        return $this;
+    }
+
     /**
      * Convert the notice to xml
      *
-     * @param Airbrake\Configuration $configuration
+     * @param \Airbrake\Configuration $configuration
+     *
      * @return string
      */
-    public function toXml(Configuration $configuration)
-    {
+    public function toXml(Configuration $configuration = null) {
+        if ($configuration === null) {
+            $configuration = $this->configuration;
+        }
         $doc = new SimpleXMLElement('<notice />');
         $doc->addAttribute('version', Version::API);
         $doc->addChild('api-key', $configuration->get('apiKey'));
-
         $notifier = $doc->addChild('notifier');
         $notifier->addChild('name', Version::NAME);
         $notifier->addChild('version', Version::NUMBER);
         $notifier->addChild('url', Version::APP_URL);
-
         $env = $doc->addChild('server-environment');
         $env->addChild('project-root', $configuration->get('projectRoot'));
         $env->addChild('environment-name', $configuration->get('environmentName'));
-
         $error = $doc->addChild('error');
         $error->addChild('class', $this->errorClass);
         $error->addChild('message', htmlspecialchars($this->errorMessage));
-
         if (count($this->backtrace) > 0) {
             $backtrace = $error->addChild('backtrace');
             foreach ($this->backtrace as $entry) {
-                $method = isset($entry['class']) ? $entry['class'].'::' : '';
+                $method = isset($entry['class']) ? $entry['class'] . '::' : '';
                 $method .= isset($entry['function']) ? $entry['function'] : '';
                 $line = $backtrace->addChild('line');
                 $line->addAttribute('file', isset($entry['file']) ? $entry['file'] : '');
@@ -69,16 +75,13 @@ class Notice extends Record
                 $line->addAttribute('method', $method);
             }
         }
-
         $request = $doc->addChild('request');
         $request->addChild('url', $configuration->get('url'));
         $request->addChild('component', $configuration->get('component'));
         $request->addChild('action', $configuration->get('action'));
-
         $this->array2Node($request, 'params', array_merge($configuration->getParameters(), array('airbrake_extra' => $this->extraParameters)));
         $this->array2Node($request, 'session', $configuration->get('sessionData'));
         $this->array2Node($request, 'cgi-data', $configuration->get('serverData'));
-
         return $doc->asXML();
     }
 
@@ -89,21 +92,18 @@ class Notice extends Record
      * @param string $key
      * @param array $params
      **/
-    protected function array2Node($parentNode, $key, $params)
-    {
-        if (count($params) == 0) {
+    protected function array2Node($parentNode, $key, $params) {
+        if (count($params) === 0) {
             return;
         }
-
         $node = $parentNode->addChild($key);
         foreach ($params as $key => $value) {
             if (is_array($value) || is_object($value)) {
                 $value = json_encode((array) $value);
             }
-
             // htmlspecialchars() is needed to prevent html characters from breaking the node.
             $node->addChild('var', htmlspecialchars($value))
-                 ->addAttribute('key', $key);
+                ->addAttribute('key', $key);
         }
     }
 }
