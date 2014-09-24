@@ -9,9 +9,9 @@ Installation
 The best way to install the library is by using [Composer](http://getcomposer.org). Add the following to `composer.json` in the root of your project:
 
 ``` javascript
-{ 
+{
   "require": {
-    "dbtlr/php-airbrake": "dev-master"
+    "brightlocal/php-airbrake": "dev-master"
   }
 }
 ```
@@ -48,7 +48,7 @@ If calling the class directly and not through an exception handler, it would be 
 require_once 'vendor/autoload.php';
 
 $apiKey  = '[your api key]'; // This is required
-$options = array(); // This is optional
+$options = []; // This is optional
 
 $config = new Airbrake\Configuration($apiKey, $options);
 $client = new Airbrake\Client($config);
@@ -67,27 +67,18 @@ try {
 
 The options array may be filled with data from the Configuration Options section, if you would like to override some of the default options. Otherwise, it can be ignored.
 
-Using Resque
-============
+Using Custom Notification Handlers
+==================================
 
-_This section assumes you are using the [PHP-Resque](https://github.com/chrisboulton/php-resque) project from [Chris Boulton](https://github.com/chrisboulton)._
+You can use external classes to handle non-standard handling of notifications, e.g. using asynchronous sending to avoid delays introduced by the need to make extra curl posts.
 
-In order to speed up polling time, it may be desirable to pair Airbrake with a Resque queue. In order to do this, you must simply include Resque in your project and pass in the queue option.
+To use custom handler, create a class that implements Airbrake\Interfaces\NotificationHandler interface, and pass an instance to the config:
 
 ```php
 <?php
 require_once 'vendor/autoload.php';
 
-Airbrake\EventHandler::start('[your api key]', true, array('queue' => 'airbrake'));
-```
-
-In order to start the requested queue, simply run this command.
-
-```
-QUEUE=airbrake APP_INCLUDE=vendor/autoload.php vendor/bin/resque
-```
-
-This will start the queue running properly.
+Airbrake\EventHandler::start('[your api key]', true, ['notificationHandler' => new MyNotificationHandler()]);
 
 Configuration Options
 =====================
@@ -105,3 +96,4 @@ Configuration Options
 - **hostname** - The hostname that was requested.
 - **queue** - Optional - the name of the Resque queue to use.
 - **secure** - Optional - Boolean that allows you to define if you want to hit the secure Airbrake endpoint.
+- **notificationHandler** - Optional - Instance of your custom Airbrake\Interfaces\NotificationHandler interface that will handle sending notifications.
