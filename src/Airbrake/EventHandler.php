@@ -122,7 +122,7 @@ class EventHandler {
             // Make sure we pass in the current backtrace, minus this function call.
             $backtrace = debug_backtrace();
             array_shift($backtrace);
-            $this->airbrakeClient->notifyOnError($message, $backtrace);
+            $this->airbrakeClient->notifyOnError(sprintf('%s in %s:%s', $message, $file, $line), $backtrace);
         }
         return true;
     }
