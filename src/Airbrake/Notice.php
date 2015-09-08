@@ -61,6 +61,7 @@ class Notice extends Record {
         $env = $doc->addChild('server-environment');
         $env->addChild('project-root', $configuration->get('projectRoot'));
         $env->addChild('environment-name', $configuration->get('environmentName'));
+        $env->addChild('hostname', $configuration->get('hostname'));
         $error = $doc->addChild('error');
         $error->addChild('class', $this->errorClass);
         $error->addChild('message', htmlspecialchars($this->errorMessage));
